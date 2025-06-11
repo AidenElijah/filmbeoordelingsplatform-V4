@@ -1,27 +1,12 @@
-version: '3.8'
-
+version: "3.9"
 services:
-  web:
+  app:
     build: .
     ports:
       - "5000:5000"
+    env_file:
+      - .env
     environment:
-      - DATABASE_URI=mysql://user:password@db:3306/filmplatform
-    depends_on:
-      - db
-
-  db:
-    image: mysql:8.0
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: filmplatform
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-    ports:
-      - "3306:3306"
+      - FLASK_ENV=development
     volumes:
-      - db_data:/var/lib/mysql
-
-volumes:
-  db_data:
+      - .:/app
