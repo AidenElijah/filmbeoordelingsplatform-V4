@@ -1,0 +1,13 @@
+# Python cache en logbestanden
+__pycache__/
+*.pyc
+*.pyo
+*.log
+
+# Git & CI/CD
+.git
+.github
+
+# Secret-bestanden
+.env
+.env.*
