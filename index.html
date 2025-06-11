@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Film Gallery</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Karma">
+<style>
+body,h1,h2,h3,h4,h5,h6 {font-family: "Karma", sans-serif}
+.w3-bar-block .w3-bar-item {padding:20px}
+.film-card {cursor:pointer;transition:transform 0.3s}
+.film-card:hover {transform:scale(1.03)}
+.modal-content {max-width:800px}
+.rating {color:gold;font-size:18px}
+.section-title {margin-top:40px;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #f1f1f1}
+.tab-button {cursor:pointer;padding:10px 20px;margin-right:5px;background:#f1f1f1;border:none}
+.tab-button.active {background:#000;color:white}
+.film-grid {display:flex;flex-wrap:wrap;justify-content:center}
+.film-center {display:flex;justify-content:center;width:100%}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav class="w3-sidebar w3-bar-block w3-card w3-top w3-xlarge w3-animate-left" style="display:none;z-index:2;width:40%;min-width:300px" id="mySidebar">
+  <a href="javascript:void(0)" onclick="w3_close()" class="w3-bar-item w3-button">Close Menu</a>
+  <a href="#all" onclick="showTab('all');w3_close()" class="w3-bar-item w3-button">All Films</a>
+  <a href="#top-rated" onclick="showTab('top-rated');w3_close()" class="w3-bar-item w3-button">Top Rated</a>
+  <a href="#recent" onclick="showTab('recent');w3_close()" class="w3-bar-item w3-button">Recent Releases</a>
+  <a href="#about" onclick="w3_close()" class="w3-bar-item w3-button">About</a>
+</nav>
+
+<!-- Top menu -->
+<div class="w3-top">
+  <div class="w3-white w3-xlarge" style="max-width:1200px;margin:auto">
+    <div class="w3-button w3-padding-16 w3-left" onclick="w3_open()">☰</div>
+    <div class="w3-right w3-padding-16">
+      <input type="text" id="searchInput" placeholder="Search films..." onkeyup="searchFilms()">
+    </div>
+    <div class="w3-center w3-padding-16">My Film Collection</div>
+  </div>
+</div>
+
+<!-- Tab Navigation -->
+<div class="w3-container" style="margin-top:100px;padding:20px">
+  <div class="w3-center">
+    <button class="tab-button active" onclick="showTab('all')">All Films</button>
+    <button class="tab-button" onclick="showTab('top-rated')">Top Rated</button>
+    <button class="tab-button" onclick="showTab('recent')">Recent Releases</button>
+  </div>
+</div>
+
+<!-- Film Modal -->
+<div id="filmModal" class="w3-modal">
+  <div class="w3-modal-content w3-animate-zoom">
+    <div class="w3-container">
+      <span onclick="document.getElementById('filmModal').style.display='none'" 
+      class="w3-button w3-display-topright">&times;</span>
+      <h2 id="modalTitle"></h2>
+      <div class="w3-row">
+        <div class="w3-half">
+          <img id="modalImage" style="width:100%">
+        </div>
+        <div class="w3-half w3-container">
+          <p><strong>Year:</strong> <span id="modalYear"></span></p>
+          <p><strong>Director:</strong> <span id="modalDirector"></span></p>
+          <p><strong>Rating:</strong> <span id="modalRating" class="rating"></span></p>
+          <p id="modalDescription"></p>
+          <p><strong>Cast:</strong> <span id="modalCast"></span></p>
+          <p><strong>Genre:</strong> <span id="modalGenre"></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+<!-- Main Content -->
+<div class="w3-main w3-content w3-padding" style="max-width:1200px;margin-top:20px">
+
+  <!-- All Films Section -->
+  <div id="all-section">
+    <h2 class="w3-center section-title">All Films</h2>
+    <div class="film-grid" id="all-films">
+      <!-- Films will be loaded here by JavaScript -->
+    </div>
+  </div>
+
+  <!-- Top Rated Section -->
+  <div id="top-rated-section" style="display:none">
+    <h2 class="w3-center section-title">Top Rated Films</h2>
+    <div class="film-grid" id="top-rated-films">
+      <!-- Top rated films will be loaded here by JavaScript -->
+    </div>
+  </div>
+
+  <!-- Recent Releases Section -->
+  <div id="recent-section" style="display:none">
+    <h2 class="w3-center section-title">Recent Releases</h2>
+    <div class="film-grid" id="recent-films">
+      <!-- Recent films will be loaded here by JavaScript -->
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="w3-center w3-padding-32">
+    <div class="w3-bar">
+      <a href="#" class="w3-bar-item w3-button w3-hover-black" onclick="prevPage()">«</a>
+      <a href="#" class="w3-bar-item w3-black w3-button" onclick="goToPage(1)">1</a>
+      <a href="#" class="w3-bar-item w3-button w3-hover-black" onclick="goToPage(2)">2</a>
+      <a href="#" class="w3-bar-item w3-button w3-hover-black" onclick="goToPage(3)">3</a>
+      <a href="#" class="w3-bar-item w3-button w3-hover-black" onclick="nextPage()">»</a>
+    </div>
+  </div>
+  
+  <hr id="about">
+
+  <!-- About Section -->
+  <div class="w3-container w3-padding-32 w3-center">  
+    <h3>About This Collection</h3><br>
+    <img src="https://m.media-amazon.com/images/M/MV5BZjEyOTE4MzMtNmMzMy00Mzc3LWJlOTQtOGJiNDE0ZmJiOTU4L2ltYWdlXkEyXkFqcGdeQXVyNTAyODkwOQ@@._V1_.jpg" alt="Film Projector" class="w3-image" style="display:block;margin:auto" width="800" height="533">
+    <div class="w3-padding-32">
+      <h4><b>A Curated Selection of Cinematic Masterpieces</b></h4>
+      <h6><i>Celebrating the Art of Filmmaking</i></h6>
+      <p>This collection represents some of the most influential and acclaimed films in cinema history. From timeless classics to modern masterpieces, each film has been selected for its artistic merit, cultural impact, and storytelling excellence. Browse through the pages to discover or rediscover these remarkable works of art.</p>
+    </div>
+  </div>
+  <hr>
+  
+  <!-- Footer -->
+  <footer class="w3-row-padding w3-padding-32">
+    <div class="w3-third">
+      <h3>ABOUT THIS SITE</h3>
+      <p>A personal collection of favorite films with descriptions, ratings, and details about each movie.</p>
+      <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
+    </div>
+  
+    <div class="w3-third">
+      <h3>FILM NEWS</h3>
+      <ul class="w3-ul w3-hoverable">
+        <li class="w3-padding-16">
+          <img src="https://m.media-amazon.com/images/M/MV5BZjEyOTE4MzMtNmMzMy00Mzc3LWJlOTQtOGJiNDE0ZmJiOTU4L2ltYWdlXkEyXkFqcGdeQXVyNTAyODkwOQ@@._V1_.jpg" class="w3-left w3-margin-right" style="width:50px">
+          <span class="w3-large">Festival Updates</span><br>
+          <span>Latest from Cannes and Venice</span>
+        </li>
+        <li class="w3-padding-16">
+          <img src="https://m.media-amazon.com/images/M/MV5BZjEyOTE4MzMtNmMzMy00Mzc3LWJlOTQtOGJiNDE0ZmJiOTU4L2ltYWdlXkEyXkFqcGdeQXVyNTAyODkwOQ@@._V1_.jpg" class="w3-left w3-margin-right" style="width:50px">
+          <span class="w3-large">New Releases</span><br>
+          <span>Coming soon to theaters</span>
+        </li> 
+      </ul>
+    </div>
+
+    <div class="w3-third w3-serif">
+      <h3>QUICK LINKS</h3>
+      <p>
+        <a href="#" class="w3-tag w3-black w3-margin-bottom">Top Rated</a>
+        <a href="#" class="w3-tag w3-dark-grey w3-margin-bottom">By Year</a>
+        <a href="#" class="w3-tag w3-dark-grey w3-margin-bottom">By Genre</a>
+        <a href="#" class="w3-tag w3-dark-grey w3-margin-bottom">Directors</a>
+      </p>
+    </div>
+  </footer>
+</div>
+
+<script>
+// Film data
+const films = [
+  {
+    title: "The Shawshank Redemption",
+    image: "https://m.media-amazon.com/images/M/MV5BMDFkYTc0MGEtZmNhMC00ZDIzLWFmNTEtODM1ZmRlYWMwMWFmXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg",
+    year: 1994,
+    director: "Frank Darabont",
+    rating: 9.3,
+    description: "Two imprisoned men bond over several years, finding solace and eventual redemption through acts of common decency.",
+    cast: "Tim Robbins, Morgan Freeman, Bob Gunton",
+    genre: "Drama"
+  },
+  {
+    title: "The Godfather",
+    image: "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
+    year: 1972,
+    director: "Francis Ford Coppola",
+    rating: 9.2,
+    description: "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.",
+    cast: "Marlon Brando, Al Pacino, James Caan",
+    genre: "Crime, Drama"
+  },
+  {
+    title: "The Dark Knight",
+    image: "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_.jpg",
+    year: 2008,
+    director: "Christopher Nolan",
+    rating: 9.0,
+    description: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
+    cast: "Christian Bale, Heath Ledger, Aaron Eckhart",
+    genre: "Action, Crime, Drama"
+  },
+  {
+    title: "Pulp Fiction",
+    image: "https://m.media-amazon.com/images/M/MV5BNGNhMDIzZTUtNTBlZi00MTRlLWFjM2ItYzViMjE3YzI5MjljXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
+    year: 1994,
+    director: "Quentin Tarantino",
+    rating: 8.9,
+    description: "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
+    cast: "John Travolta, Uma Thurman, Samuel L. Jackson",
+    genre: "Crime, Drama"
+  },
+  {
+    title: "Fight Club",
+    image: "https://m.media-amazon.com/images/M/MV5BMmEzNTkxYjQtZTc0MC00YTVjLTg5ZTEtZWMwOWVlYzY0NWIwXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
+    year: 1999,
+    director: "David Fincher",
+    rating: 8.8,
+    description: "An insomniac office worker and a devil-may-care soapmaker form an underground fight club that evolves into something much, much more.",
+    cast: "Brad Pitt, Edward Norton, Helena Bonham Carter",
+    genre: "Drama"
+  },
+  {
+    title: "Inception",
+    image: "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg",
+    year: 2010,
+    director: "Christopher Nolan",
+    rating: 8.8,
+    description: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
+    cast: "Leonardo DiCaprio, Joseph Gordon-Levitt, Ellen Page",
+    genre: "Action, Adventure, Sci-Fi"
+  },
+  {
+    title: "The Matrix",
+    image: "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg",
+    year: 1999,
+    director: "Lana Wachowski, Lilly Wachowski",
+    rating: 8.7,
+    description: "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
+    cast: "Keanu Reeves, Laurence Fishburne, Carrie-Anne Moss",
+    genre: "Action, Sci-Fi"
+  },
+  {
+    title: "Parasite",
+    image: "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_.jpg",
+    year: 2019,
+    director: "Bong Joon Ho",
+    rating: 8.6,
+    description: "Greed and class discrimination threaten the newly formed symbiotic relationship between the wealthy Park family and the destitute Kim clan.",
+    cast: "Song Kang-ho, Lee Sun-kyun, Cho Yeo-jeong",
+    genre: "Comedy, Drama, Thriller"
+  },
+  {
+    title: "Interstellar",
+    image: "https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg",
+    year: 2014,
+    director: "Christopher Nolan",
+    rating: 8.6,
+    description: "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
+    cast: "Matthew McConaughey, Anne Hathaway, Jessica Chastain",
+    genre: "Adventure, Drama, Sci-Fi"
+  },
+  {
+    title: "The Social Network",
+    image: "https://m.media-amazon.com/images/M/MV5BOGUyZDUxZjEtMmIzMC00MzlmLTg4MGItZWJmMzBhZjE0Mjc1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg",
+    year: 2010,
+    director: "David Fincher",
+    rating: 7.7,
+    description: "As Harvard student Mark Zuckerberg creates the social networking site that would become known as Facebook, he is sued by the twins who claimed he stole their idea, and by the co-founder who was later squeezed out of the business.",
+    cast: "Jesse Eisenberg, Andrew Garfield, Justin Timberlake",
+    genre: "Biography, Drama"
+  },
+  {
+    title: "Dune",
+    image: "https://m.media-amazon.com/images/M/MV5BN2FjNmEyNWMtYzM0ZS00NjIyLTg5YzYtYThlMGVjNzE1OGViXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_.jpg",
+    year: 2021,
+    director: "Denis Villeneuve",
+    rating: 8.0,
+    description: "Feature adaptation of Frank Herbert's science fiction novel about the son of a noble family entrusted with the protection of the most valuable asset and most vital element in the galaxy.",
+    cast: "Timothée Chalamet, Rebecca Ferguson, Zendaya",
+    genre: "Adventure, Sci-Fi"
+  },
+  {
+    title: "Everything Everywhere All at Once",
+    image: "https://m.media-amazon.com/images/M/MV5BYTdiOTIyZTQtNmQ1OS00NjZlLWIyMTgtYzk5Y2M3ZDVmMDk1XkEyXkFqcGdeQXVyMTAzMDg4NzU0._V1_.jpg",
+    year: 2022,
+    director: "Daniel Kwan, Daniel Scheinert",
+    rating: 8.1,
+    description: "A middle-aged Chinese immigrant is swept up into an insane adventure in which she alone can save existence by exploring other universes and connecting with the lives she could have led.",
+    cast: "Michelle Yeoh, Stephanie Hsu, Ke Huy Quan",
+    genre: "Action, Adventure, Comedy"
+  }
+];
+
+let currentPage = 1;
+const filmsPerPage = 2; // Only 2 films per page now
+let currentTab = 'all';
+
+// Initialize the page
+window.onload = function() {
+  showTab('all');
+};
+
+// Show tab content
+function showTab(tab) {
+  currentTab = tab;
+  currentPage = 1;
+  
+  // Hide all sections first
+  document.getElementById('all-section').style.display = 'none';
+  document.getElementById('top-rated-section').style.display = 'none';
+  document.getElementById('recent-section').style.display = 'none';
+  
+  // Show selected section
+  document.getElementById(tab + '-section').style.display = 'block';
+  
+  // Update active tab button
+  const buttons = document.getElementsByClassName('tab-button');
+  for (let i = 0; i < buttons.length; i++) {
+    buttons[i].classList.remove('active');
+    if (buttons[i].textContent.toLowerCase().includes(tab)) {
+      buttons[i].classList.add('active');
+    }
+  }
+  
+  // Load appropriate films
+  if (tab === 'all') {
+    showPage(currentPage);
+  } else if (tab === 'top-rated') {
+    showTopRated();
+  } else if (tab === 'recent') {
+    showRecent();
+  }
+}
+
+// Show films for specific page (centered)
+function showPage(page) {
+  currentPage = page;
+  const start = (page - 1) * filmsPerPage;
+  const end = start + filmsPerPage;
+  const filmsToShow = films.slice(start, end);
+  
+  let html = '<div class="film-center">';
+  filmsToShow.forEach(film => {
+    html += `
+      <div class="w3-quarter film-card" onclick="openModal('${film.title}')" style="margin:0 10px">
+        <img src="${film.image}" alt="${film.title}" style="width:100%">
+        <h3>${film.title}</h3>
+        <p>${film.year} • ${film.director}</p>
+        <p class="rating">${'★'.repeat(Math.round(film.rating/2))}${'☆'.repeat(5-Math.round(film.rating/2))} ${film.rating}/10</p>
+      </div>
+    `;
+  });
+  html += '</div>';
+  
+  document.getElementById('all-films').innerHTML = html;
+}
+
+// Open modal with film details
+function openModal(title) {
+  const film = films.find(f => f.title === title);
+  if (film) {
+    document.getElementById('modalTitle').innerHTML = film.title;
+    document.getElementById('modalImage').src = film.image;
+    document.getElementById('modalYear').innerHTML = film.year;
+    document.getElementById('modalDirector').innerHTML = film.director;
+    document.getElementById('modalRating').innerHTML = '★'.repeat(Math.round(film.rating/2)) + '☆'.repeat(5-Math.round(film.rating/2)) + ` ${film.rating}/10`;
+    document.getElementById('modalDescription').innerHTML = film.description;
+    document.getElementById('modalCast').innerHTML = film.cast;
+    document.getElementById('modalGenre').innerHTML = film.genre;
+    document.getElementById('filmModal').style.display = 'block';
+  }
+}
+
+// Pagination functions
+function prevPage() {
+  if (currentPage > 1) {
+    goToPage(currentPage - 1);
+  }
+}
+
+function nextPage() {
+  if (currentPage < Math.ceil(films.length / filmsPerPage)) {
+    goToPage(currentPage + 1);
+  }
+}
+
+function goToPage(page) {
+  currentPage = page;
+  if (currentTab === 'all') {
+    showPage(page);
+  }
+}
+
+// Search function
+function searchFilms() {
+  const input = document.getElementById('searchInput').value.toLowerCase();
+  const filteredFilms = films.filter(film => 
+    film.title.toLowerCase().includes(input) || 
+    film.director.toLowerCase().includes(input) ||
+    film.genre.toLowerCase().includes(input)
+  );
+  
+  let html = '<div class="film-center">';
+  filteredFilms.forEach(film => {
+    html += `
+      <div class="w3-quarter film-card" onclick="openModal('${film.title}')" style="margin:0 10px">
+        <img src="${film.image}" alt="${film.title}" style="width:100%">
+        <h3>${film.title}</h3>
+        <p>${film.year} • ${film.director}</p>
+        <p class="rating">${'★'.repeat(Math.round(film.rating/2))}${'☆'.repeat(5-Math.round(film.rating/2))} ${film.rating}/10</p>
+      </div>
+    `;
+  });
+  html += '</div>';
+  
+  document.getElementById(currentTab + '-films').innerHTML = html;
+}
+
+// Filter functions
+function showTopRated() {
+  const topRated = [...films].sort((a, b) => b.rating - a.rating).slice(0, 4);
+  
+  let html = '<div class="film-center">';
+  topRated.forEach(film => {
+    html += `
+      <div class="w3-quarter film-card" onclick="openModal('${film.title}')" style="margin:0 10px">
+        <img src="${film.image}" alt="${film.title}" style="width:100%">
+        <h3>${film.title}</h3>
+        <p>${film.year} • ${film.director}</p>
+        <p class="rating">${'★'.repeat(Math.round(film.rating/2))}${'☆'.repeat(5-Math.round(film.rating/2))} ${film.rating}/10</p>
+      </div>
+    `;
+  });
+  html += '</div>';
+  
+  document.getElementById('top-rated-films').innerHTML = html;
+}
+
+function showRecent() {
+  const recent = [...films].sort((a, b) => b.year - a.year).slice(0, 4);
+  
+  let html = '<div class="film-center">';
+  recent.forEach(film => {
+    html += `
+      <div class="w3-quarter film-card" onclick="openModal('${film.title}')" style="margin:0 10px">
+        <img src="${film.image}" alt="${film.title}" style="width:100%">
+        <h3>${film.title}</h3>
+        <p>${film.year} • ${film.director}</p>
+        <p class="rating">${'★'.repeat(Math.round(film.rating/2))}${'☆'.repeat(5-Math.round(film.rating/2))} ${film.rating}/10</p>
+      </div>
+    `;
+  });
+  html += '</div>';
+  
+  document.getElementById('recent-films').innerHTML = html;
+}
+
+// Sidebar functions
+function w3_open() {
+  document.getElementById("mySidebar").style.display = "block";
+}
+ 
+function w3_close() {
+  document.getElementById("mySidebar").style.display = "none";
+}
+</script>
+
+</body>
+</html>
